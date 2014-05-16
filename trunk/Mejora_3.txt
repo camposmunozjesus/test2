@@ -1,0 +1,88 @@
+MEJORA - 3 --- SEND MAIL PLUGIN DE GRAILS: ENVIAR IMÁGENES EN UN MAIL
+=====================================================================
+Se desea enviar un mail con una imagen en la firma, así como enlaces. Será necesario enviar información (dirección del enlace) desde el controlador
+hasta el template.
+
+Código en el controlador:
+	def enviarMail(personaInstance, perfil)
+	{
+		def enviarTo = personaInstance.correu
+		def link = perfil.urlRecomanacio
+		try
+		{
+			//Enviar mail a l'usuari i al gestor to "juan.luis.moreno@UPC.EDU" programa.cardio@upc.edu
+			sendMail {
+			   multipart true
+			   to enviarTo
+			   from "UPC Cardio <UPC.Cardio@upc.edu>"
+			   bcc "campos.tenia.que.ser@gmail.com"
+			   subject "UPC Cardio: recomanacions individualitzades"
+			   html  g.render( template: 'mailTemplate', model: [link:link])
+			   inline 'logo_cor_peque', 'image/jpg', new File('./web-app/images/logo_cor_peque.png')
+			}			
+	   }
+Este es el código (closure) que se introduce en el controlador ClasseAController.groovy (nombre de ejemplo).
+
+Entonces en "Views" -> "ClasseA" debe existir el archivo llamado "_mailTemplate.gsp" que debe contener lo siguiente:
+	<%@ page contentType="text/html" %>
+	<html>
+	<head>
+		<style>
+			.bodyMail{
+				font-family: Arial, Helvetica, sans-serif;
+				font-size:0.8em;
+			}
+			
+			.footerMail{
+				font-family: Arial, Helvetica, sans-serif;
+				margin-top: 3px;
+				font-size:0.7em;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="bodyMail">
+			Moltes gràcies per participar en el Programa de promoció de la salut cardiovascular (UPC Cardio).
+			<br><br>
+			Heu rebut en mà un informe individual del vostre estat de salut cardiovascular. La valoració d'aquests resultats permet estimar el risc d'un episodi cardiovascular en els propers 10 anys.
+			<br><br>
+			Estem definint les recomanacions relacionades amb l'exercici físic més adequades en funció del vostre perfil de risc. Podreu consultar aquestes recomanacions clicant al següent enllaç quan hagin passat 48 hores des de la recepció d'aquest missatge.
+			<br><br>
+			<a href="${link}">${link}</a>
+			<br><br>
+			Si teniu cap dubte, escriviu un correu electrònic a <a href="dubtes.cardio@upc.edu">dubtes.cardio@upc.edu</a>
+			<br><br>
+			Cordialment,<br><br>
+		</div>
+		<div class="footerMail">
+			<b>Programa de promoció de la salut cardiovascular</b><br>
+			<div style="color:#0082ca;"><b>Universitat Politècnica de Catalunya · BarcelonaTech</b></div><br>
+			<div style="margin-top: -5px;">
+				<div>
+					<img src="cid:logo_cor_peque" width="80px" height="62px" border="0" align="left"/>
+				</div>
+				<div style="margin-left:92px;padding-top:12px;">
+					<a href="http://www.upc.edu/prevencio/promocio-salut/upc-cardio">http://www.upc.edu/prevencio/promocio-salut/upc-cardio</a><br>
+					dubtes.cardio@upc.edu
+				</div>
+			</div>
+		</div>
+	</body>
+	</html>
+	
+Aspectos a tener en cuenta:
+* La imagen "logo_cor_peque.png" debe situarse en la carpeta "web-app" -> "images". Para incluir la imagen debe hacerse en el controlador y en el template.
+* El template debe comenzar con "_" y situarse en la carpeta dentro de "Views" que corresponda al controlador.
+* En g.render se muestra cómo enviar datos para que los utilice el template.
+* en el código groovy debe indicarse "multipart true" para que admita imágenes.
+
+
+
+*****************************************************************************************************************************************************
+------------------------------
+Creación:	16-05-2014
+
+Jesús Campos Muñoz
+jesus.campos@upc.edu
+------------------------------

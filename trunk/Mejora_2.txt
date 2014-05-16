@@ -1,0 +1,26 @@
+MEJORA - 2 --- TEMPUS: BOTÓN DE "CERCA" COLOCADO EN SU SITIO CORRECTO
+=====================================================================
+En la aplicación RLG en el list de permiDiesAdminEstat (y en otros sitios) el botón para realizar la búsqueda aparece descuadrado.
+El botón "Cerca" está descuadrado (fuera de lugar y pisando una línea.
+Substituir el <fieldset> que hay debajo del título por:
+	<div class="marginTop">
+		<g:form action="list">
+			<fieldset class="border padding">
+			<legend align="left" style="margin-left:15px">Selecció</legend>
+				<div style="clear:both;"></div>	
+				<div class="padding floatLeft marginSmallRight">
+					<label for="estat" style="margin-right:7px;">Estat</label>
+					<g:select name="filtreEstat" keys="${['0','1','2','3','4','5']}" from="${['Pendents','Acceptats','Denegats','ViP Responsable','ViP Provisional','Tots']}" value="${params?.filtreEstat}" class="dropdownMediumWidth" />
+				</div>
+				<div class="padding floatLeft marginSmallRight">
+					<label for="tipus" style="margin-right:7px;">Tipus de permís</label>
+					<g:select name="filtrePermis" from="${codiPermisDiesList.descripcio}" keys="${codiPermisDiesList.codi}" value="${params?.filtrePermis}" />
+				</div>
+				<div class="padding floatLeft">
+						<g:submitButton name="search" value="Cerca" params="${params}" />
+				</div>
+			</fieldset>							
+		</g:form>
+	</div>
+	
+Funciona en IExplorer (con y sin vista de compatibilidad) y en Mozilla Firefox.
