@@ -1,7 +1,9 @@
-MEJORA - 4 --- RLG:CARGAR BOLSAS DE HORAS AL CAMBIAR EL VALOR DEL SELECT SÓLO SI NO HAY FECHAS SELECCIONADAS
-============================================================================================================
+MEJORA - 4 --- RLG: CARGAR BOLSAS DE HORAS AL CAMBIAR EL VALOR DEL SELECT SÓLO SI NO HAY FECHAS SELECCIONADAS
+=============================================================================================================
 Esto es debido a que cuando aparece sólo la bolsa de conciliación y la gente cambia en el desplegable a cardio, no aparece la bolsa de cardio, sino que hay que pulsar la lupa.
 Ahora, la bolsa de cardio aparecerá siempre y cuando las dos fechas etén vacías. Si no se deberá utilizar la lupa, como habitualmente se hace.
+
+Funciona en IE con y sin vista de compatibilidad. En Firefox Mozilla.
 
 Cambios en el controlador: Ninguno
 
