@@ -1,0 +1,51 @@
+MEJORA - 5 --- TODAS LAS APLICACIONES: AUTOMATIZACIÓN DEL CÓDIGO JS GENERADOR DE LOS MENÚS DESPLEGABLES DE LOS LAYOUTS
+======================================================================================================================
+Actualmente para generar un menú desplegable en un layout se utiliza:
+Código GSP/HTML:
+	<div id="Menu0" title="Menú" class="dijitTitlePane">
+		<div class="dijitTitlePaneTitle">
+			<div><img class="dijitArrowNode" alt="Fletxa" src="${resource(dir:'js',file:'dojo/1.8.2/dojo/resources/blank.gif')}"/></div>
+			<span class="dijitTitlePaneTextNode">Taules mestres</span>
+		</div>
+		<div id="Outer0" class="dijitTitlePaneContentOuter">					
+			<ul id="uli" class="iconList">							
+				<li class="clock"><g:link controller="codiSolicitudMarcatge" class="linkGrisFosc">Marcatges pendents</g:link></li>
+				<li class="clock"><g:link controller="codiPermisHores" class="linkGrisFosc">Permisos per hores</g:link></li>
+				<li class="clock"><g:link controller="codiPermisDies" class="linkGrisFosc">Permisos per dies</g:link></li>
+				...
+			</ul>					
+		</div>
+	</div>
+	y así se van añadiendo otros desplegables con Menu1 y Outer1, Menu2 y Outer2 ...
+	
+Y en el código JS hay que añadir:
+	$('#Menu0 div.dijitTitlePaneTitle').click(function() {
+		$('#Outer0').slideToggle('medium'); 
+		});  
+	$('#Menu1 div.dijitTitlePaneTitle').click(function() {
+		$('#Outer1').slideToggle('medium'); 
+	});	
+	y si hubiera un Menu3/Outer3 habría que añadir:
+	$('#Menu3 div.dijitTitlePaneTitle').click(function() {
+		$('#Outer3').slideToggle('medium'); 
+	});
+	
+Para no tener que modificar tanto código de la parte JS cada vez que se añade un menú desplegable, sólo cambiando una variable, se propone el siguiente 
+código:
+	$(document).ready(function(){
+		var numMenusDesplegables = XXXXX; //Indicar la cantidad de menús desplegables que se tienen.
+		
+		for(var i=0; i<numMenusDesplegables; i++){
+			$('#Menu'+i+' div.dijitTitlePaneTitle').click({id: i},function(event) {
+				$('#Outer'+event.data.id).slideToggle('medium'); 
+			}); 
+		}
+	});
+
+*****************************************************************************************************************************************************
+------------------------------
+Creación:	23-05-2014
+
+Jesús Campos Muñoz
+jesus.campos@upc.edu
+------------------------------
