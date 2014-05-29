@@ -1,5 +1,6 @@
 MEJORA - 5 --- TODAS LAS APLICACIONES: AUTOMATIZACIÓN DEL CÓDIGO JS GENERADOR DE LOS MENÚS DESPLEGABLES DE LOS LAYOUTS
 ======================================================================================================================
+Comprobado en IExplorer con y sin vista de compatibilidad. En Firefox también.
 Actualmente para generar un menú desplegable en un layout se utiliza:
 Código GSP/HTML:
 	<div id="Menu0" title="Menú" class="dijitTitlePane">
