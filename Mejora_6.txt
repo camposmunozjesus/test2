@@ -1,0 +1,1002 @@
+MEJORA - 6 --- BORDE DE LAS CELDAS DEL FIN DE SEMANA 
+====================================================
+Coloreado de las celdas del fin de semana.
+* Hay que modificar el vector del controlador para enviar además del estado, el día de la semana.
+* En IExplorer con vista de compatibilidad no se pinta el borde derecho, por lo que una solución es aumentar el grosor del borde para que se vea.
+
+* En condiciones normales se ve algo bonito, pero al tener que adaptarlo para vista de compatibilidad queda una "castaña".
+
+GSP
+
+<html>
+<head>
+	<!-- <meta name="layout" content="mainGestor" /> -->
+
+	<title>Quadre de permisos per dies</title>
+	
+		<script type="text/javascript" src="${resource(dir:'js',file:'crossbrowser.js')}"></script>		
+</head>
+
+<body>
+	<div class="nav">
+		<div class="leftNav">
+			<span class="menuButton">
+				<a class="home" href="${createLink(uri: '/marcatgesGestio')}">
+					Inici
+				</a>
+			</span>	
+			<sec:access expression="hasRole('ROLE_USER')">
+				<span class="menuButton">
+					<a class="jump" href="${createLink(uri: '/')}">
+						Racó personal
+					</a>
+				</span>	
+			</sec:access>				
+		</div>
+		<div class="menuButton logout floatRight"> 
+			<g:if test="${session.user!=null}">
+				<span class="login"> 
+					${session.user}
+				</span>
+			</g:if> 
+			<g:link class="exit" controller="logout">Desconnecta</g:link>
+		</div>
+	</div>
+	
+	<div class="body">
+		<h2>Quadre de permisos per dies</h2>
+			<div class="marginTop">
+				<g:form action="list">
+					<fieldset class="border padding">
+					<legend align="left" style="margin-left:15px">Selecció</legend>
+						<div style="clear:both;"></div>	
+						<div class="padding floatLeft marginSmallRight">
+							<label for="tipusPermisDies" style="margin-right:7px;">Tipus de permís</label>
+							<g:select class="dropdownLargeWidth" name="tipusPermisDies" from="${tipusPermisDiesList?.descripcio}" keys="${tipusPermisDiesList?.codi}"  value="${params?.tipusPermisDies}"/>	
+						</div>
+						<div class="padding floatLeft marginSmallRight">
+							<label for="anyo" style="margin-right:7px;">Any</label>								
+							<g:select class="width75px" name="anyo" from="${anysList}" keys="${2013..2014}"  value="${params?.anyo}" />	
+						</div>
+						<div class="padding floatLeft marginSmallRight">
+							<label for="mesAny" style="margin-right:7px;">Mes</label>								
+							<g:select class="width100px" name="mesAny" from="${mesosAnyList}" keys="${1..12}"  value="${params?.mesAny}" />	
+						</div>
+						
+						<div class="padding floatLeft">
+							<g:submitButton name="search" value="Cerca" />
+						</div>
+					</fieldset>							
+				</g:form>
+			</div>		
+		<br/>
+		
+		<g:if test="${flash.message}">
+			<div class="message">
+				<p>${flash.message}</p>
+			</div>
+		</g:if>	
+
+		<br/>
+		<div class="list" style="overflow-y:hidden; overflow-x:auto;">
+			<g:form>
+				<table id="tableList">
+					<thead>
+						<tr>
+							<th class="text">&nbsp;</th>
+							<g:each in="${diesList}" status="i" var="dia">
+								<g:if test="${dia.descripcioDia.equals("dg") || dia.descripcioDia.equals("ds")}">
+									<g:set var="typeClass" value="tdWeekend" />
+								</g:if>
+								<g:else>
+									<g:set var="typeClass" value="tdWeek" />
+								</g:else>
+								<td class="${typeClass}">
+									${dia.codiDia}
+								</td>
+							</g:each>
+						</tr>
+						<tr>
+							<g:sortableColumn property="cognom1" title="Nom" params="${params}" style="min-width:60px"/>
+							<g:each in="${diesList}" status="i" var="dia">
+								<g:if test="${dia.descripcioDia.equals("dg") || dia.descripcioDia.equals("ds")}">
+									<g:set var="typeClass" value="tdWeekend tdInferior" />
+								</g:if>
+								<g:else>
+									<g:set var="typeClass" value="tdWeek" />
+								</g:else>
+								<td class="${typeClass}">
+									${dia.descripcioDia}
+								</td>
+							</g:each>
+						</tr>
+					</thead>
+					<tbody>
+						<g:if test="${!resultList}">
+							<tr style="display:none"><th></th></tr>
+						</g:if>					
+						<g:each in="${resultList}" status="i" var="personaInstance">
+							<tr id="tr${i}" class="${(i % 2) == 0 ? 'odd' : 'even'}">															
+								<td class="padding width50p">
+									${personaInstance.cognom1} ${personaInstance.cognom2}, ${personaInstance.nom}
+								</td>
+								<g:each in="${usersDiesList[i]}" var="estat">
+									<g:if test="${estat.descripcioDia.equals("dg") || estat.descripcioDia.equals("ds")}">
+										<g:if test="${(i == (resultList.size()-1))}">
+											<g:set var="typeClass" value="tdWeekendEstat" />
+										</g:if>
+										<g:else>
+											<g:set var="typeClass" value="tdWeekendEstat" />
+										</g:else>
+									</g:if>
+									<g:else>
+										<g:set var="typeClass" value="tdWeekEstat" />
+									</g:else>
+								
+									<g:if test="${estat.estatDia==0 || estat.estatDia==3 || estat.estatDia==4}">
+										<td class="${typeClass}">
+											<g:img dir="images" file="/icons/ok-pro.png" width="12" height="12" style="vertical-align:middle;" alt="Imatge pendent, vist-i-plau responsable o vist-i-plau provisional" title="Imatge pendent, vist-i-plau responsable o vist-i-plau provisional"/>
+										</td>
+									</g:if>
+									<g:elseif test="${estat.estatDia==1}">
+										<td class="${typeClass}">
+											<g:img dir="images" file="/icons/ok.png" width="12" height="12" style="vertical-align:middle;" alt="Imatge acceptat" title="Imatge acceptat"/>
+										</td >
+									</g:elseif>
+									<g:elseif test="${estat.estatDia==2}">
+										<td class="${typeClass}">
+											<g:img dir="images" file="/icons/ko.png" width="12" height="12" style="vertical-align:middle;" alt="Imatge denegat" title="Imatge denegat"/>
+										</td>
+									</g:elseif> 
+									<g:else>
+										<td class="${typeClass}">
+										</td>
+									</g:else>
+								</g:each>
+							</tr>													
+						</g:each>
+					</tbody>
+				</table>
+			</g:form>
+		</div>		
+		<div class="paginateButtons">
+			<g:paginate total="${results}" params="${params}" next="Següent" prev="Anterior" />
+		</div>
+		<br/>
+		Llegenda:
+		<br/><br/>
+		<g:img dir="images" file="/icons/ok.png" width="16" height="16" style="vertical-align:middle;" alt="Imatge acceptat" title="Imatge acceptat"/> Acceptat<br/>
+		<g:img dir="images" file="/icons/ko.png" width="16" height="16" style="vertical-align:middle;" alt="Imatge denegat" title="Imatge denegat"/> Denegat<br/>
+		<g:img dir="images" file="/icons/ok-pro.png" width="16" height="16" style="vertical-align:middle;" alt="Imatge pendent, vist-i-plau responsable o vist-i-plau provisional" title="Imatge pendent, vist-i-plau responsable o vist-i-plau provisional"/> Pendent, Vist-i-plau responsable o Vist-i-plau provisional<br/>
+		<br/> 
+	</div>
+	
+	
+</body>
+</html>
+
+
+CONTROLLER
+
+package rlg.gestor
+
+import grails.plugins.springsecurity.Secured
+import java.text.DateFormatSymbols
+import java.text.SimpleDateFormat
+import rlg.CodiPermisDies;
+import rlg.PermisDies
+import rlg.Persones
+import utils.BaseControler
+
+@Secured(['ROLE_GESTOR'])
+
+class PermisDiesQuadreGestioController  extends BaseControler{
+
+
+	static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
+	
+	static anysList = ["2013", "2014"]
+	
+	static mesosAnyList = ["Gener", "Febrer", "Març", "Abril", "Maig", "Juny", "Juliol", "Agost", "Setembre", "Octubre", "Novembre", "Desembre"]
+	
+	def index(){
+		redirect(action: "list", params: params)
+	}
+	
+	def list(){
+		
+		this.populateUserName()
+		
+		def diesList = []	//Llista amb els dies del mes i nom del dia de la setmana.
+		def usersDiesList = []	//Llista amb els dies del mes de cada usuari
+		def tipusPermisDiesList
+		def resultList
+		int results
+		
+		this.paramsMaxSet(20, 40)
+		
+		try{
+			Calendar cal = Calendar.getInstance()
+
+			SimpleDateFormat sdfAny = new SimpleDateFormat("yyyy")
+			SimpleDateFormat sdfMes = new SimpleDateFormat("MM")
+			SimpleDateFormat sdfCodiDia = new SimpleDateFormat("d")
+			SimpleDateFormat sdfDescripcioDia = new SimpleDateFormat("E", new Locale("ca", "ES")) //Abreviatura dia setmana.
+
+			params.anyo=params.anyo?:sdfAny.format(cal.getTime())
+			params.mesAny=params.mesAny?:sdfMes.format(cal.getTime())
+			
+			//S'estableix la data indicada a la cerca, fixant el dia del mes al primer.
+			cal.set(Calendar.YEAR, Integer.valueOf(params.anyo))
+			cal.set(Calendar.MONTH, Integer.valueOf(params.mesAny)-1)
+			cal.set(Calendar.DAY_OF_MONTH, 1)
+					
+
+			//Genera la cabecera del mes a visualitzar y la llista de resultats totals(on s'acumulen diferents peticions d'un mateix permís)
+			for (int i=0; i<cal.getActualMaximum(Calendar.DAY_OF_MONTH); i++){
+				//def dia = [descripcioDia: sdfDescripcioDia.format(cal.getTime()), codiDia :sdfCodiDia.format(cal.getTime())] //Dia de la setmana amb punt
+				def dia = [descripcioDia: sdfDescripcioDia.format(cal.getTime()).substring(0, 2), codiDia :sdfCodiDia.format(cal.getTime())]
+				diesList << dia
+				cal.roll(Calendar.DAY_OF_MONTH, 1)	 //NO es pot fer servir add, problemes en lúltim dia del mes.
+			}
+	
+		}
+		catch(Exception e){
+			log.error("[list]:: EXCEPTION: "+e.message.toString())
+		}
+
+		//Búsqueda de TOTES les persones a càrrec d'un cap.
+		def query = {
+			or
+			{
+				eq("usuariCap1", session.user, [ignoreCase: true])
+				eq("usuariCap2", session.user, [ignoreCase: true])
+				eq("usuariCap3", session.user, [ignoreCase: true])
+			}
+		}
+		
+		resultList = Persones.createCriteria().list(query)
+
+		if(resultList){
+			//Aconseguir els permisos que han demanat els usuaris.
+			query = {
+				'in'("pernr", resultList.pernr)
+			}
+			
+			def codiTipusPermisDies = []
+			codiTipusPermisDies = PermisDies.createCriteria().list(query)
+
+			if(codiTipusPermisDies){
+
+				def codiTipusPermisDiesList = (codiTipusPermisDies*.codiPermisDies).unique()	//S'eliminen els permisos duplicats
+	
+				//Traducció dels permisos.
+				query = {
+					'in'("codi", codiTipusPermisDiesList)
+					order("descripcio", "asc")
+				}
+				tipusPermisDiesList = CodiPermisDies.createCriteria().list(query)
+
+				//El permís per defecte és el de vacances en cas d'existir.
+				if(tipusPermisDiesList.codi.toList().contains('7006')){
+					params.tipusPermisDies=params.tipusPermisDies?:'7006'
+				}
+				else{
+					params.tipusPermisDies=params.tipusPermisDies?:tipusPermisDiesList[0].codi
+				}
+			}	
+				
+			//Búsqueda de les persones a càrrec d'un cap ordenades.
+			query = {
+				or
+				{
+					eq("usuariCap1", session.user, [ignoreCase: true])
+					eq("usuariCap2", session.user, [ignoreCase: true])
+					eq("usuariCap3", session.user, [ignoreCase: true])
+				}
+			}
+				
+			resultList = Persones.createCriteria().list(params,query)
+			results = resultList.getTotalCount()
+				
+			//Para cada persona de la llista, s'omplen els seus dies.
+			if(resultList){
+				for(persona in resultList){
+					//Buscar si té festius del permís sol·licitat dintre del mes.
+					usersDiesList << getDiesUsuari(params.anyo, params.mesAny, params.tipusPermisDies, persona.pernr.toLong())
+				}
+			}	
+		}
+		
+		[tipusPermisDiesList:tipusPermisDiesList, mesosAnyList:mesosAnyList, anysList:anysList, resultList:resultList, results:results, diesList:diesList, usersDiesList:usersDiesList]
+	}
+
+	
+	def private getDiesUsuari(def anyo, def mes, def tipus, def pernr){
+		Date dataInici = null;
+		Date dataFi = null;
+		def diesUsuariList = []
+		SimpleDateFormat sdfDescripcioDia = new SimpleDateFormat("E", new Locale("ca", "ES"))
+		
+		try
+		{
+			Calendar cal = Calendar.getInstance()
+			//Fixem el primer dia del mes a les 00:00
+			cal.set(Calendar.YEAR, Integer.valueOf(anyo))
+			cal.set(Calendar.MONTH, Integer.valueOf(mes)-1)
+			cal.set(Calendar.DAY_OF_MONTH, 1)
+			cal.set(Calendar.HOUR_OF_DAY, 00)
+			cal.set(Calendar.MINUTE, 00)
+			cal.set(Calendar.SECOND, 00)
+			cal.set(Calendar.MILLISECOND, 00)	//Si no es posen els mseg, en BD 2014-06-01 00:00:00.0 NO es la mateixa data que la que s'acaba de fixar. 
+			dataInici = cal.getTime()
+			
+			//Fixem l'últim dia del mes a les 23:59
+			cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH))
+			cal.set(Calendar.HOUR_OF_DAY, 23)
+			cal.set(Calendar.MINUTE, 59)
+			cal.set(Calendar.SECOND, 59)
+			dataFi = cal.getTime()
+			
+			//Es genera la llista de l'usuari
+			cal.set(Calendar.DAY_OF_MONTH, 1)
+			for(int i=0; i<cal.getActualMaximum(Calendar.DAY_OF_MONTH); i++){
+				def dia = [descripcioDia: sdfDescripcioDia.format(cal.getTime()).substring(0, 2), estatDia: (-1)]
+				diesUsuariList << dia
+				cal.roll(Calendar.DAY_OF_MONTH, 1)
+			}
+			
+			def query = {
+				and {
+					eq("pernr", pernr)
+					eq("codiPermisDies", tipus)
+					and{
+						ge("dataFi", dataInici)
+						le("dataInici", dataFi)
+					}
+				}
+			}
+			def permisosList = PermisDies.createCriteria().list(query)
+			if(permisosList){
+				for(permis in permisosList){
+					cal.set(Calendar.YEAR, Integer.valueOf(anyo))
+					cal.set(Calendar.MONTH, Integer.valueOf(mes)-1)
+					cal.set(Calendar.DAY_OF_MONTH, 1)
+					cal.set(Calendar.HOUR_OF_DAY, 00)
+					cal.set(Calendar.MINUTE, 00)
+					cal.set(Calendar.SECOND, 00)
+					cal.set(Calendar.MILLISECOND, 00)
+					
+					for(int i=0; i<cal.getActualMaximum(Calendar.DAY_OF_MONTH); i++){
+							if( cal.getTime().compareTo(permis.dataInici) >=0 && 
+								cal.getTime().compareTo(permis.dataFi) <=0 ) {
+	
+								if(diesUsuariList[i].estatDia!=1)	//Si el día está aceptado, pasamos al siguiente día.
+								{
+									if((permis.estado == 2) && (diesUsuariList.estatDia[i]==(-1))){
+										diesUsuariList[i].estatDia = permis.estado
+									}
+									else{
+										diesUsuariList[i].estatDia = permis.estado
+									}
+								}
+							}
+							cal.roll(Calendar.DAY_OF_MONTH, 1)
+					}
+				}
+			}
+		}
+		catch(Exception e){
+			log.error("[getDiesUsuari]::EXCEPTION: "+e.message.toString())
+		}
+		return diesUsuariList
+	}
+}
+
+HOJA DE ESTILOS: MAIN.CSS
+
+html, body {
+  height: 100%;
+}    
+
+html * {
+    margin: 0;
+    /*padding: 0; SELECT NOT DISPLAYED CORRECTLY IN FIREFOX */
+}
+
+body {
+	background: #fff;
+    color: #333;
+	Font-family: Verdana, Helvetica, Arial, Sans-serif;
+    font: 0.7em verdana, arial, helvetica, sans-serif;                       /*11px*/
+    width: 99.9%;
+}
+
+.body {
+    float: left;
+    margin: 15px 15px 0px 20%;
+    width: 79%;
+}
+
+.widthMobile {
+	min-width: 550px;
+}
+
+#totalWidth {
+	/*width: 1090px;*/
+	width:100%;	
+	clear: both;   
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    margin: 0 auto -35px;
+}
+
+/* GENERAL */
+
+.spinner {
+    padding: 5px;
+    position: absolute;
+    right: 0;
+}
+
+#upcLogo {
+	padding:8px;
+}
+
+a,a:link {
+	color:#333333;
+	text-decoration:none;
+}
+a:visited{
+	color:#333333;
+}
+a:hover {
+	text-decoration:underline;
+}
+
+a.noDeco:hover  {
+	text-decoration:none;
+} 
+
+.linkBlau {
+	color:#007DCC !important;
+	
+}
+
+.linkGrisFosc
+{
+	color:#333 !important;
+}
+
+.linkGris
+{
+	color:#666 !important;
+}
+
+.linkGrisClar
+{
+	color:#999 !important;
+}
+
+h1 {
+    color: #007BC0;
+    font-family: Helvetica, Arial, Verdana, Sans-serif;
+    font-weight: normal;
+    font-size: 2.45em !important; /*27px*/
+    margin: .8em 0 .3em 0;
+}
+
+/*Nota, farem servir el h2 com a H3 perquÃ© Ã©s massa gran, H2 hauria de tindre 22px*/
+
+h2 {
+    color: #007BC0;
+    font-family: Helvetica, Arial, Verdana, Sans-serif !important;
+    font-weight: normal;
+    font-size: 1.7em !important;  /*19px*/
+}
+
+h3 {
+    color: #007BC0;
+    font-family: Helvetica, Arial, Verdana, Sans-serif !important;
+    font-weight: normal;
+    font-size: 1.7em !important;     /*19px*/  
+}
+
+h4 {
+    color: #007BC0;
+    font-family: Helvetica, Arial, Verdana, Sans-serif !important;
+    font-weight: normal;
+    font-size: 1.54em !important; /*17px*/
+}
+
+ul {
+    padding-left: 15px;
+}
+
+input, select, textarea {
+    background-color: #fcfcfc;
+    border: 1px solid #ccc;
+    font: 1em verdana, arial, helvetica, sans-serif; /*11px*/
+    margin: 2px 0;
+    padding: 2px 4px;
+}
+
+
+input.reset, select.reset, textarea.reset {
+    font: 0.7em verdana, arial, helvetica, sans-serif; /*11px*/
+    background-color: transparent;
+    border: 0px;
+}
+
+select {
+   padding: 2px 2px 2px 0;
+}
+textarea {
+	width: 250px;
+	height: 150px;
+	vertical-align: top;
+}
+
+input:focus, select:focus, textarea:focus {
+    border: 1px solid #b2d1ff;
+}
+
+.bodyIframe{
+    float: left;
+    width: 99.9%;
+}
+
+/* NAVIGATION MENU */
+
+.nav {
+    background: #fff url(../images/icons/shadow.jpg) bottom repeat-x;
+    border: 1px solid #ccc;
+    border-style: solid solid solid solid;
+    margin-top: 5px;
+    padding: 7px 5px;
+    height: 15px;
+    width: 97%;
+    margin-left:1%;
+}
+
+.margin
+{
+	margin-left:10%;
+}
+
+.margin20p
+{
+	margin-left:20%;
+}
+
+.bigMargin
+{
+	margin-left:25%;
+}
+
+.centerMargin
+{
+	margin-left:40%;
+}
+
+.menuButton {
+    font-size: 1em; /*11px;*/
+    padding: 0 5px;     
+}
+
+.menuButton a {
+    color: #333;
+    padding: 4px 15px;
+}
+
+.menuButton a.ajuda {
+    background: url(../images/icons/help.png) center left no-repeat;
+    color: #333;    
+    padding: 4px 0 0 22px;      
+}
+
+.menuButton a.contacte {
+    background: url(../images/icons/help.png) center left no-repeat;
+    color: #333;    
+    padding: 4px 10px 0 22px;      
+}
+
+.menuButton a.manual {
+    background: url(../images/icons/separador.png) center left no-repeat;
+    color: #333;    
+    padding: 4px 10px;   
+}
+
+.menuButton a.exit {
+    background: url(../images/icons/porta-blava.png) center left no-repeat;
+    color: #333;
+    padding-left: 22px;    
+}
+
+.menuButton .login {
+    background: url(../images/login.png) center left no-repeat;
+    color: #333;
+    padding-left: 17px;
+    margin-right:3px;
+}
+
+.menuButton a.home {
+    background: url(../images/icons/home.png) center left no-repeat;
+    color: #333;
+    padding-left: 25px;
+}
+
+.menuButton a.jump {
+    background: url(../images/icons/go-racop.png) center left no-repeat;
+    color: #333;
+    padding-left: 25px;
+}
+
+.menuButton a.list {
+    background: url(../images/icons/database_table.png) center left no-repeat;
+    color: #333;
+    padding-left: 25px;
+}
+.menuButton a.create {
+    background: url(../images/icons/afegir.png) center left no-repeat;
+    color: #333;
+    padding-left: 25px;
+}
+
+.menuButton a.marcatgeEntrada {
+    background: url(../images/icons/rellotge-verd.png) center left no-repeat;
+    color: #333;
+    padding-left: 25px;
+}
+
+.menuButton a.marcatgeSortida {
+    background: url(../images/icons/rellotge-blau.png) center left no-repeat;
+    color: #333;
+    padding-left: 25px;
+}
+
+
+/* MESSAGES AND ERRORS */
+
+.message {
+    background: #f3f8fc url(../images/icons/information.png) 8px 50% no-repeat;
+    border: 1px solid #b2d1ff;
+    color: #006dba;
+    margin: 10px 0 5px 0;
+    padding: 5px 5px 5px 30px
+}
+
+div.errors {
+    background: #fff3f3;
+    border: 1px solid red;
+    color: #cc0000;
+    margin: 10px 0 5px 0;
+    padding: 5px 0 5px 0;
+}
+div.errors ul {
+    list-style: none;
+    padding: 0;
+}
+div.errors li {
+	background: url(../images/icons/exclamation.png) 8px 0% no-repeat;
+    line-height: 16px;
+    padding-left: 30px;
+}
+
+td.errors select {
+    border: 1px solid red;
+}
+td.errors input {
+    border: 1px solid red;
+}
+td.errors textarea {
+    border: 1px solid red;
+}
+
+/* TABLES */
+
+table.noborder {
+    border: 0px !important;
+}
+
+table {
+    border: 1px solid #ccc;
+    width: 100%
+}
+tr {
+    border: 0;
+}
+
+td, th {
+    font: 1em verdana, arial, helvetica, sans-serif; /*11px*/
+    color: #333;
+    text-align: left;
+    vertical-align: middle;
+    padding: 2px 6px;
+}
+th {
+    background: url(../images/icons/shadow.jpg) repeat-x #FFFFFF;
+    font-weight: bold;
+    line-height: 17px;
+}
+
+th a:link, th a:visited, th a:hover {
+    color: #333;
+    display: block;
+    font-size: 1em; /*11px*/
+    text-decoration: none;
+}
+
+th.asc a {
+    background-image: url(../images/icons/sorted_asc.gif);
+    background-position: right; 
+    background-repeat: no-repeat;    
+}
+th.desc a {
+    background-image: url(../images/icons/sorted_desc.gif);
+    background-position: right; 
+    background-repeat: no-repeat;    
+}
+
+.odd {
+    background: #f7f7f7;
+    vertical-align:middle;
+}
+.even {
+    background: #fff;
+    vertical-align:middle;
+}
+
+/* LIST */
+
+.list table {
+    border-collapse: collapse;
+    width:100%;
+}
+.list th, .list td {
+    border-left: 1px solid #ddd;
+}
+.hovered {
+  background: none repeat scroll 0 0 #D7EFF7; 
+}
+.hoveredGradient {
+  /*background: url("../images/standardGradient.png") repeat-x #ABD6FF;*/
+	background: url("../images/standardGradient.png") repeat-x scroll 0 0 #ABD6FF;  
+  
+}
+.activatedGradient {
+  background: url("../images/standardGradient.png") repeat-x #7DBDFA;	
+}
+
+/* PAGINATION */
+
+.paginateButtons {
+    background: #fff url(../images/icons/shadow.jpg) bottom repeat-x;
+    border: 1px solid #ccc;
+    border-top: 0;
+    color: #666;
+    font-size: 0.9em; /*10px*/
+    overflow: hidden;
+    padding: 10px 3px;
+}
+.paginateButtons a {
+    background: #fff;
+    border: 1px solid #ccc;
+    border-color: #ccc #aaa #aaa #ccc;
+    color: #666;
+    margin: 0 3px;
+    padding: 2px 6px;
+}
+.paginateButtons span {
+    padding: 2px 3px;
+}
+
+/* DIALOG */
+
+.dialog table {
+    padding: 5px 0;
+}
+
+.prop {
+    padding: 5px;
+}
+.prop .name {
+    text-align: left;
+    vertical-align: middle;
+    width: 15%;
+    white-space: nowrap;
+}
+.prop .value {
+    text-align: left;
+    width: 85%;
+}
+
+/* ACTION BUTTONS */
+
+.buttons {
+    background: #fff url(../images/icons/shadow.jpg) bottom repeat-x;
+    border: 1px solid #ccc;
+    color: #666;
+    font-size: 0.9em; /*10px*/
+    margin-top: 5px;
+    overflow: hidden;
+    padding: 0;
+}
+
+.buttonsNew {
+    background: #fff url(../images/icons/shadow.jpg) bottom repeat-x;
+    border: 1px solid #ccc;
+    color: #666;
+    font-size: 0.9em; /*10px*/
+    margin-top: 5px;
+    overflow: hidden;
+    padding: 4px 3px 3px 3px; 
+}
+
+.noTopMargin
+{
+    margin-top: 0px;
+}
+
+.buttons input {
+    background: #fff;
+    border: 0;
+    color: #333;
+    cursor: pointer;
+    font-size: 1.1em; /*11px*/
+    margin-left: 3px;
+    overflow: visible;
+    padding: 2px 6px;
+}
+
+.buttonsNew input {
+    background: #fff;
+    border: 0;
+    color: #333;
+    cursor: pointer;
+    font-size: 1.1em; /*11px*/
+    margin-left: 3px;
+    overflow: visible;
+    padding: 2px 6px;
+}
+
+
+.buttons input:hover {
+	text-decoration:underline;
+}
+
+.buttonsNew input:hover {
+	text-decoration:underline;
+}
+
+.buttons input.delete {
+    background: transparent url(../images/icons/papelera.png) 5px 50% no-repeat;
+    padding-left: 28px;
+}
+.buttons input.edit {
+    background: transparent url(../images/icons/editar.png) 5px 50% no-repeat;
+    padding-left: 28px;
+}
+
+.buttons input.visualitza {
+    background: transparent url(../images/icons/comentari.png) 5px 50% no-repeat;
+    padding-left: 28px;
+}
+
+.buttons input.save {
+    background: transparent url(../images/icons/guardar.png) 5px 50% no-repeat;
+    padding-left: 28px;
+}
+
+.buttons input.undo {
+    background: transparent url(../images/icons/undo.png) 5px 50% no-repeat;
+    padding-left: 28px;
+}
+
+.buttonsNew input.excel {
+    background: transparent url(../images/excel.png) 5px 50% no-repeat;
+    padding-left: 28px;
+}
+
+.buttons input.transparent {
+    background: transparent 5px 50% no-repeat;
+    padding-left: 28px;
+    text-decoration:none;
+}
+
+.enllac {
+    border: 0px;
+    color: #666;
+    font-size: 0.9em; /*10px*/
+    margin-top: 5px;
+    overflow: hidden;
+    padding: 0;
+}
+
+.enllac input {
+    background: #fff;
+    border: 0;
+    color: #333;
+    cursor: pointer;
+    font-size: 1em; /*11px*/
+    margin-left: 3px;
+    overflow: visible;
+    padding: 2px 6px;
+}
+
+.enllac input:hover {
+	text-decoration:underline;
+}
+
+.enllac input.create {
+    background: url(../images/icons/afegir.png) center left no-repeat;
+    color: #333;
+    padding-left: 25px;
+}
+
+.ui-datepicker-trigger {
+	margin-left: 3px;
+	margin-bottom: -3px;
+}
+
+.ui-datepicker-today a {
+   border: 1px solid #aed0ea !important; background: #d7ebf9 url(images/ui-bg_glass_80_d7ebf9_1x400.png) 50% 50% repeat-x !important; font-weight: bold !important; color: #2779aa !important;
+}
+
+.ui-state-highlight a { 
+	border: 1px solid #2694e8 !important; background: #3baae3 url(images/ui-bg_glass_50_3baae3_1x400.png) 50% 50% repeat-x !important; font-weight: bold !important; color: #ffffff !important; 
+}
+
+.ui-state-highlight { 
+	border: 1px solid transparent !important;
+	background: transparent !important;  
+}
+
+button.ui-datepicker-current { display: none; }
+
+.ui-datepicker-unchecked a {
+   border: 1px solid #aed0ea !important; background: #d7ebf9 url(images/ui-bg_glass_80_d7ebf9_1x400.png) 50% 50% repeat-x !important; font-weight: bold !important; color: #2779aa !important;
+}
+
+.tdWeek {
+    background: url(../images/icons/shadow.jpg) repeat-x #FFFFFF;
+    line-height: 17px;
+    text-align:center;
+}
+
+.tdWeekend {
+    background:url(../images/icons/shadow.jpg) repeat-x #FFFFFF;
+    line-height:17px;
+ 	color:#ff0000;
+	text-align:center;
+	border-left: 2px solid #ff0000 !important;
+	border-right: 2px solid #ff0000 !important;
+}
+
+
+.tdWeekendEstat {
+    
+    line-height:17px;
+ 	color:#ff0000;
+	text-align:center;
+	border-left: 2px solid #ff0000 !important;
+	border-right: 2px solid #ff0000 !important;
+		
+}
+
+
+/* ************* */
+.tdInferior{
+	border-bottom: 2px solid #ff0000 !important;
+}
+	
+	
+	
+*****************************************************************************************************************************************************
+------------------------------
+Creación:	10-06-2014
+
+Jesús Campos Muñoz
+jesus.campos@upc.edu
+------------------------------
